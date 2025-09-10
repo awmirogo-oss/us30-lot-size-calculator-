@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ماشین حساب لات سایز داوجونز (US30)</title>
+  <style>
+    body{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding:18px; direction: rtl; background:#f7f7f8; color:#111}
+    .card{max-width:720px;margin:8px auto;padding:18px;background:#fff;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.06)}
+    h1{font-size:20px;margin:0 0 8px}
+    label{display:block;margin-top:12px;font-size:14px}
+    input[type="number"]{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-top:6px;font-size:16px;box-sizing:border-box}
+    .row{display:flex;gap:8px}
+    .half{flex:1}
+    button{margin-top:14px;width:100%;padding:12px;border-radius:10px;border:0;background:#0066ff;color:#fff;font-size:16px}
+    .result{margin-top:14px;padding:12px;border-radius:8px;background:#f0f8ff;border:1px solid #d6e9ff}
+    small{color:#666}
+    .note{margin-top:8px;color:#444;font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>ماشین حساب لات سایز داوجونز (US30)</h1>
+    <div class="note">فرمول: لات = (بالانس × درصد ریسک) ÷ (استاپ لاس × ارزشِ هر پوینت در ۱ لات)</div>
+
+    <label>بالانس حساب (USD)</label>
+    <input id="balance" type="number" min="0" step="0.01" value="1000">
+
+    <label>درصد ریسک (%)</label>
+    <input id="riskPercent" type="number" min="0" step="0.01" value="2">
+
+    <label>استاپ‌لاس (تعداد پوینت)</label>
+    <input id="stopLoss" type="number" min="0" step="0.1" value="100">
+
+    <label>ارزش هر پوینت در <strong>0.01 لات</strong> (USD) — پیش‌فرض 0.1 برای داوجونز</label>
+    <input id="valuePer0_01" type="number" min="0" step="0.0001" value="0.1">
+
+    <button id="calcBtn">محاسبه کن</button>
+
+    <div id="out" class="result" style="display:none"></div>
+
+    <div class="note">
+      <strong>توضیح:</strong> مقدار پیش‌فرض 0.1 دلار برای هر پوینت در 0.01 لات معمولاً برای داوجونز (US30) استفاده میشود — در صورت اتصال به بروکر یا حساب متفاوت، ممکن است اندکی فرق داشته باشد. اگر مقدار دقیق از بروکرت رو داری، آن را وارد کن تا دقیق‌تر شود.
+    </div>
+
+    <div class="note">برای ذخیره آسان روی آیفون: پس از دانلود این فایل، آن را در اپ <em>Files</em> قرار بده، سپس در Safari باز کن و از گزینه <em>Share → Add to Home Screen</em> استفاده کن تا شبیه اپ روی هوم‌اسکرین داشته باشی.</div>
+  </div>
+
+  <script>
+    function formatNumber(n){return Number(n).toLocaleString('en-US', {maximumFractionDigits:4})}
+    document.getElementById('calcBtn').addEventListener('click', function(){
+      const bal = parseFloat(document.getElementById('balance').value) || 0
+      const riskP = parseFloat(document.getElementById('riskPercent').value) || 0
+      const sl = parseFloat(document.getElementById('stopLoss').value) || 0
+      const val01 = parseFloat(document.getElementById('valuePer0_01').value) || 0
+
+      const out = document.getElementById('out')
+      if(bal<=0 || riskP<=0 || sl<=0 || val01<=0){
+        out.style.display='block'
+        out.innerHTML = '<div style="color:#b00020">همه مقادیر باید بزرگتر از صفر باشند.</div>'
+        return
+      }
+
+      // محاسبه
+      const riskAmount = bal * (riskP/100)
+      // تعداد 0.01 لات مورد نیاز
+      const microLots = riskAmount / (sl * val01)
+      const standardLots = microLots / 100.0
+      // ارزش هر پوینت در 1 لات
+      const valuePerPoint1Lot = val01 * 100.0
+      // نمایش
+      out.style.display='block'
+      out.innerHTML = `
+        <div><strong>مبلغ ریسک (USD):</strong> ${formatNumber(riskAmount)}</div>
+        <div><strong>ارزش هر پوینت در 1 لات:</strong> ${formatNumber(valuePerPoint1Lot)} USD</div>
+        <div style="margin-top:8px"><strong>نتیجه:</strong></div>
+        <div>• تعداد میکرولات (۰.۰۱ لات): <strong>${formatNumber(microLots)}</strong></div>
+        <div>• لات استاندارد (1.00 lot): <strong>${formatNumber(standardLots)}</strong></div>
+        <div style="margin-top:8px"><small>اگر می‌خوای لات را گرد کنی: برای ریسک کمتر، به پایین‌تر گرد کن؛ برای استفاده از عدد دقیق بروکر، از قسمت میکرولات استفاده کن.</small></div>
+      `
+    })
+
+    // محاسبه اولیه هنگامی که باز میشه
+    document.getElementById('calcBtn').click()
+  </script>
+</body>
+</html>
